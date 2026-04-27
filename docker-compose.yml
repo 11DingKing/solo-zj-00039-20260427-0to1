@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: course_platform_db
+    environment:
+      POSTGRES_USER: course_user
+      POSTGRES_PASSWORD: course_password
+      POSTGRES_DB: course_platform
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - course_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U course_user -d course_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: course_platform_backend
+    environment:
+      FLASK_APP: run.py
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://course_user:course_password@db:5432/course_platform
+      JWT_SECRET_KEY: course_platform_jwt_secret_key_2026
+      UPLOAD_FOLDER: /app/uploads
+      MAX_CONTENT_LENGTH: 500000000
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - course_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: course_platform_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - course_network
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+
+networks:
+  course_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  uploads_data:
