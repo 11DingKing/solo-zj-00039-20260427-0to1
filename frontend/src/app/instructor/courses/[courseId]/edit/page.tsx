@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Plus, 
   Trash2, 
@@ -52,6 +53,7 @@ interface Lesson {
   id: string;
   title: string;
   lesson_type: 'video' | 'text' | 'quiz';
+  chapter_id: string;
   order_index: number;
   duration: number;
   video_url: string;

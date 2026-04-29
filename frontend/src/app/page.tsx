@@ -145,7 +145,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {homeData?.personalized?.length > 0 && (
+      {(homeData?.personalized?.length ?? 0) > 0 && (
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
@@ -170,7 +170,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {homeData?.popular?.length > 0 && (
+      {(homeData?.popular?.length ?? 0) > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
@@ -195,7 +195,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {homeData?.new?.length > 0 && (
+      {(homeData?.new?.length ?? 0) > 0 && (
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
@@ -220,7 +220,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {homeData?.top_rated?.length > 0 && (
+      {(homeData?.top_rated?.length ?? 0) > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">

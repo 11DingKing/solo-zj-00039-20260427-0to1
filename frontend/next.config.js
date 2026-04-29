@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
   images: {
     domains: ['localhost', 'trae-api-cn.mchost.guru'],
     remotePatterns: [

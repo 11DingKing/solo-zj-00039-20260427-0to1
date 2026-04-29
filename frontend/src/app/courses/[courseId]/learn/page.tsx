@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Play, 
   Pause, 
@@ -53,6 +54,7 @@ interface ProgressMap {
     video_progress: number;
     text_read: boolean;
     quiz_score: number;
+    quiz_total: number;
   };
 }
 
