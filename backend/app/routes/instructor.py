@@ -7,8 +7,9 @@ from app.models import Course, Enrollment, LessonProgress, Review, Chapter, Less
 instructor_bp = Blueprint('instructor', __name__)
 
 @instructor_bp.route('/courses', methods=['GET'])
-@jwt_required()
 def get_instructor_courses():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':
@@ -40,8 +41,9 @@ def get_instructor_courses():
     return jsonify({'courses': courses_data}), 200
 
 @instructor_bp.route('/course/<course_id>/students', methods=['GET'])
-@jwt_required()
 def get_course_students(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':
@@ -87,8 +89,9 @@ def get_course_students(course_id):
     }), 200
 
 @instructor_bp.route('/course/<course_id>/progress/<student_id>', methods=['GET'])
-@jwt_required()
 def get_student_detail_progress(course_id, student_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':
@@ -168,8 +171,9 @@ def get_student_detail_progress(course_id, student_id):
     }), 200
 
 @instructor_bp.route('/course/<course_id>/stats', methods=['GET'])
-@jwt_required()
 def get_course_stats(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':
@@ -226,8 +230,9 @@ def get_course_stats(course_id):
     }), 200
 
 @instructor_bp.route('/stats', methods=['GET'])
-@jwt_required()
 def get_instructor_stats():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':
@@ -236,17 +241,22 @@ def get_instructor_stats():
     courses = Course.query.filter_by(instructor_id=current_user['id']).all()
     course_ids = [c.id for c in courses]
     
-    total_students = Enrollment.query.filter(
-        Enrollment.course_id.in_(course_ids)
-    ).count()
+    total_students = 0
+    total_ratings = 0
+    avg_rating = 0
     
-    total_ratings = Review.query.filter(
-        Review.course_id.in_(course_ids)
-    ).count()
-    
-    avg_rating = db.session.query(
-        func.avg(Review.rating)
-    ).filter(Review.course_id.in_(course_ids)).scalar() or 0
+    if course_ids:
+        total_students = Enrollment.query.filter(
+            Enrollment.course_id.in_(course_ids)
+        ).count()
+        
+        total_ratings = Review.query.filter(
+            Review.course_id.in_(course_ids)
+        ).count()
+        
+        avg_rating = db.session.query(
+            func.avg(Review.rating)
+        ).filter(Review.course_id.in_(course_ids)).scalar() or 0
     
     return jsonify({
         'total_courses': len(courses),

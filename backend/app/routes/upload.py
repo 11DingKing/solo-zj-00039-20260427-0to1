@@ -21,8 +21,9 @@ def create_date_folder(base_path):
     return full_path, date_str
 
 @upload_bp.route('/video', methods=['POST'])
-@jwt_required()
 def upload_video():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':
@@ -61,8 +62,9 @@ def upload_video():
     }), 201
 
 @upload_bp.route('/cover', methods=['POST'])
-@jwt_required()
 def upload_cover():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':
@@ -106,8 +108,9 @@ def upload_cover():
     }), 201
 
 @upload_bp.route('/avatar', methods=['POST'])
-@jwt_required()
 def upload_avatar():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if 'image' not in request.files:

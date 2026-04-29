@@ -13,8 +13,9 @@ def generate_certificate_number():
     return f"CERT-{timestamp}-{unique}"
 
 @certificates_bp.route('/generate/<course_id>', methods=['POST'])
-@jwt_required()
 def generate_certificate(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     enrollment = Enrollment.query.filter_by(
@@ -75,8 +76,9 @@ def generate_certificate(course_id):
     }), 201
 
 @certificates_bp.route('/mine', methods=['GET'])
-@jwt_required()
 def get_my_certificates():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     certificates = Certificate.query.filter_by(
@@ -99,8 +101,9 @@ def get_my_certificates():
     return jsonify({'certificates': certs_data}), 200
 
 @certificates_bp.route('/<certificate_id>', methods=['GET'])
-@jwt_required()
 def get_certificate(certificate_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     certificate = Certificate.query.get(certificate_id)

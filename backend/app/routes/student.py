@@ -8,8 +8,9 @@ from app.models import Enrollment, Course, StudyRecord, Review, Certificate
 student_bp = Blueprint('student', __name__)
 
 @student_bp.route('/courses', methods=['GET'])
-@jwt_required()
 def get_my_courses():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     status = request.args.get('status')
     
@@ -42,8 +43,9 @@ def get_my_courses():
     return jsonify({'courses': courses_data}), 200
 
 @student_bp.route('/timeline', methods=['GET'])
-@jwt_required()
 def get_study_timeline():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
@@ -101,8 +103,9 @@ def get_study_timeline():
     }), 200
 
 @student_bp.route('/record', methods=['POST'])
-@jwt_required()
 def add_study_record():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     data = request.get_json()
     
@@ -128,8 +131,9 @@ def add_study_record():
     }), 201
 
 @student_bp.route('/stats', methods=['GET'])
-@jwt_required()
 def get_student_stats():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     total_enrolled = Enrollment.query.filter_by(
@@ -166,8 +170,9 @@ def get_student_stats():
     }), 200
 
 @student_bp.route('/reviews', methods=['GET'])
-@jwt_required()
 def get_my_reviews():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     reviews = Review.query.filter_by(

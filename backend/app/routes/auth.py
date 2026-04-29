@@ -122,8 +122,9 @@ def get_current_user():
     }), 200
 
 @auth_bp.route('/profile', methods=['PUT'])
-@jwt_required()
 def update_profile():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     user = User.query.get(current_user['id'])
     

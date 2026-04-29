@@ -120,8 +120,9 @@ def get_course(course_id):
     return jsonify(course_to_dict(course, include_details=True)), 200
 
 @courses_bp.route('', methods=['POST'])
-@jwt_required()
 def create_course():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':
@@ -151,8 +152,9 @@ def create_course():
     }), 201
 
 @courses_bp.route('/<course_id>', methods=['PUT'])
-@jwt_required()
 def update_course(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     course = Course.query.get(course_id)
     
@@ -187,8 +189,9 @@ def update_course(course_id):
     }), 200
 
 @courses_bp.route('/<course_id>/chapters', methods=['POST'])
-@jwt_required()
 def create_chapter(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     course = Course.query.get(course_id)
     
@@ -226,8 +229,9 @@ def create_chapter(course_id):
     }), 201
 
 @courses_bp.route('/chapters/<chapter_id>', methods=['PUT'])
-@jwt_required()
 def update_chapter(chapter_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     chapter = Chapter.query.get(chapter_id)
     
@@ -260,8 +264,9 @@ def update_chapter(chapter_id):
     }), 200
 
 @courses_bp.route('/chapters/<chapter_id>', methods=['DELETE'])
-@jwt_required()
 def delete_chapter(chapter_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     chapter = Chapter.query.get(chapter_id)
     
@@ -281,8 +286,9 @@ def delete_chapter(chapter_id):
     return jsonify({'message': 'Chapter deleted successfully'}), 200
 
 @courses_bp.route('/chapters/reorder', methods=['POST'])
-@jwt_required()
 def reorder_chapters():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     data = request.get_json()
     
@@ -301,8 +307,9 @@ def reorder_chapters():
     return jsonify({'message': 'Chapters reordered successfully'}), 200
 
 @courses_bp.route('/chapters/<chapter_id>/lessons', methods=['POST'])
-@jwt_required()
 def create_lesson(chapter_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     chapter = Chapter.query.get(chapter_id)
     
@@ -354,8 +361,9 @@ def create_lesson(chapter_id):
     }), 201
 
 @courses_bp.route('/lessons/<lesson_id>', methods=['PUT'])
-@jwt_required()
 def update_lesson(lesson_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     lesson = Lesson.query.get(lesson_id)
     
@@ -401,8 +409,9 @@ def update_lesson(lesson_id):
     }), 200
 
 @courses_bp.route('/lessons/<lesson_id>', methods=['GET'])
-@jwt_required()
 def get_lesson(lesson_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     lesson = Lesson.query.get(lesson_id)
     
     if not lesson:
@@ -428,8 +437,9 @@ def get_lesson(lesson_id):
     return jsonify(lesson_data), 200
 
 @courses_bp.route('/lessons/<lesson_id>', methods=['DELETE'])
-@jwt_required()
 def delete_lesson(lesson_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     lesson = Lesson.query.get(lesson_id)
     
@@ -447,8 +457,9 @@ def delete_lesson(lesson_id):
     return jsonify({'message': 'Lesson deleted successfully'}), 200
 
 @courses_bp.route('/lessons/reorder', methods=['POST'])
-@jwt_required()
 def reorder_lessons():
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     data = request.get_json()
     

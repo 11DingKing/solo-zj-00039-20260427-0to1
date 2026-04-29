@@ -56,8 +56,9 @@ def get_course_reviews(course_id):
     }), 200
 
 @reviews_bp.route('/course/<course_id>', methods=['POST'])
-@jwt_required()
 def create_review(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     enrollment = Enrollment.query.filter_by(
@@ -109,8 +110,9 @@ def create_review(course_id):
     }), 201
 
 @reviews_bp.route('/<review_id>', methods=['PUT'])
-@jwt_required()
 def update_review(review_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     review = Review.query.get(review_id)
@@ -140,8 +142,9 @@ def update_review(review_id):
     return jsonify({'message': 'Review updated successfully'}), 200
 
 @reviews_bp.route('/<review_id>/reply', methods=['POST'])
-@jwt_required()
 def reply_to_review(review_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     if current_user['role'] != 'instructor':

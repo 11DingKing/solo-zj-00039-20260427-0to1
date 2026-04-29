@@ -32,8 +32,9 @@ def update_enrollment_progress(enrollment):
     db.session.commit()
 
 @progress_bp.route('/enroll/<course_id>', methods=['POST'])
-@jwt_required()
 def enroll_course(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     course = Course.query.get(course_id)
@@ -69,8 +70,9 @@ def enroll_course(course_id):
     }), 201
 
 @progress_bp.route('/enrollment/<course_id>', methods=['GET'])
-@jwt_required()
 def get_enrollment(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     enrollment = Enrollment.query.filter_by(
@@ -93,8 +95,9 @@ def get_enrollment(course_id):
     }), 200
 
 @progress_bp.route('/lesson/<lesson_id>', methods=['GET'])
-@jwt_required()
 def get_lesson_progress(lesson_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     progress = LessonProgress.query.filter_by(
@@ -117,8 +120,9 @@ def get_lesson_progress(lesson_id):
     }), 200
 
 @progress_bp.route('/lesson/<lesson_id>/video', methods=['POST'])
-@jwt_required()
 def update_video_progress(lesson_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     data = request.get_json()
     
@@ -173,8 +177,9 @@ def update_video_progress(lesson_id):
     }), 200
 
 @progress_bp.route('/lesson/<lesson_id>/text', methods=['POST'])
-@jwt_required()
 def mark_text_read(lesson_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     lesson = Lesson.query.get(lesson_id)
@@ -222,8 +227,9 @@ def mark_text_read(lesson_id):
     }), 200
 
 @progress_bp.route('/lesson/<lesson_id>/quiz', methods=['POST'])
-@jwt_required()
 def submit_quiz(lesson_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     data = request.get_json()
     
@@ -288,8 +294,9 @@ def submit_quiz(lesson_id):
     }), 200
 
 @progress_bp.route('/course/<course_id>/all', methods=['GET'])
-@jwt_required()
 def get_all_lesson_progress(course_id):
+    from flask_jwt_extended import verify_jwt_in_request
+    verify_jwt_in_request()
     current_user = get_jwt_identity()
     
     course = Course.query.get(course_id)

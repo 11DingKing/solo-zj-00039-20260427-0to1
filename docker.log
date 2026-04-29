@@ -1,0 +1,135 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.26kB done
+#1 DONE 0.0s
+
+#2 [frontend internal] load build definition from Dockerfile
+#2 transferring dockerfile: 259B done
+#2 DONE 0.1s
+
+#3 [backend internal] load build definition from Dockerfile
+#3 transferring dockerfile: 403B done
+#3 DONE 0.1s
+
+#4 [backend internal] load metadata for docker.io/library/python:3.11-slim
+#4 ...
+
+#5 [frontend internal] load metadata for docker.io/library/node:20-alpine
+#5 DONE 0.4s
+
+#6 [frontend internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [frontend 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#7 DONE 0.0s
+
+#8 [frontend internal] load build context
+#8 transferring context: 1.88kB done
+#8 DONE 0.0s
+
+#9 [frontend 2/6] WORKDIR /app
+#9 CACHED
+
+#10 [frontend 3/6] COPY package.json ./
+#10 CACHED
+
+#11 [frontend 4/6] RUN npm config set registry https://registry.npmmirror.com &&     npm install --legacy-peer-deps
+#11 CACHED
+
+#12 [frontend 5/6] COPY . .
+#12 CACHED
+
+#13 [frontend 6/6] RUN npm run build
+#13 CACHED
+
+#14 [frontend] exporting to image
+#14 exporting layers done
+#14 writing image sha256:3096ee6bec0e370642baabd6ce7ec43079e9f244217a041f18894399f4409dd4 done
+#14 naming to docker.io/library/solo-zj-00039-20260427-0to1-frontend done
+#14 DONE 0.0s
+
+#4 [backend internal] load metadata for docker.io/library/python:3.11-slim
+#4 ...
+
+#15 [frontend] resolving provenance for metadata file
+#15 DONE 0.0s
+
+#4 [backend internal] load metadata for docker.io/library/python:3.11-slim
+#4 DONE 1.8s
+
+#16 [backend internal] load .dockerignore
+#16 transferring context: 2B done
+#16 DONE 0.0s
+
+#17 [backend 1/7] FROM docker.io/library/python:3.11-slim@sha256:6d85378d88a19cd4d76079817532d62232be95757cb45945a99fec8e8084b9c2
+#17 resolve docker.io/library/python:3.11-slim@sha256:6d85378d88a19cd4d76079817532d62232be95757cb45945a99fec8e8084b9c2 0.0s done
+#17 DONE 0.0s
+
+#18 [backend internal] load build context
+#18 transferring context: 169.17kB done
+#18 DONE 0.0s
+
+#19 [backend 2/7] WORKDIR /app
+#19 CACHED
+
+#20 [backend 3/7] RUN apt-get update && apt-get install -y     gcc     libpq-dev     && rm -rf /var/lib/apt/lists/*
+#20 CACHED
+
+#21 [backend 4/7] COPY requirements.txt .
+#21 CACHED
+
+#22 [backend 5/7] RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+#22 CACHED
+
+#23 [backend 6/7] COPY . .
+#23 DONE 0.3s
+
+#24 [backend 7/7] RUN mkdir -p /app/uploads/videos /app/uploads/covers
+#24 DONE 0.2s
+
+#25 [backend] exporting to image
+#25 exporting layers 0.1s done
+#25 writing image sha256:1bcfc28abf2a0e750b60fbdc59c35de9bbf025d48afc84088d4f859f9eacb5dd done
+#25 naming to docker.io/library/solo-zj-00039-20260427-0to1-backend done
+#25 DONE 0.1s
+
+#26 [backend] resolving provenance for metadata file
+#26 DONE 0.0s
+ solo-zj-00039-20260427-0to1-backend  Built
+ solo-zj-00039-20260427-0to1-frontend  Built
+ Network solo-zj-00039-20260427-0to1_course_network  Creating
+ Network solo-zj-00039-20260427-0to1_course_network  Created
+ Container course_platform_db  Creating
+ Container course_platform_db  Created
+ Container course_platform_backend  Creating
+ Container course_platform_backend  Created
+ Container course_platform_frontend  Creating
+ Container course_platform_frontend  Created
+Attaching to course_platform_backend, course_platform_db, course_platform_frontend
+course_platform_db  | 
+course_platform_db  | PostgreSQL Database directory appears to contain a database; Skipping initialization
+course_platform_db  | 
+course_platform_db  | 2026-04-29 11:53:25.493 UTC [1] LOG:  starting PostgreSQL 16.13 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+course_platform_db  | 2026-04-29 11:53:25.493 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+course_platform_db  | 2026-04-29 11:53:25.493 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+course_platform_db  | 2026-04-29 11:53:25.497 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+course_platform_db  | 2026-04-29 11:53:25.502 UTC [28] LOG:  database system was shut down at 2026-04-29 11:53:20 UTC
+course_platform_db  | 2026-04-29 11:53:25.507 UTC [1] LOG:  database system is ready to accept connections
+course_platform_frontend  | 
+course_platform_frontend  | > course-platform-frontend@1.0.0 start
+course_platform_frontend  | > next start
+course_platform_frontend  | 
+course_platform_backend   |  * Serving Flask app 'app'
+course_platform_backend   |  * Debug mode: on
+course_platform_backend   | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+course_platform_backend   |  * Running on all addresses (0.0.0.0)
+course_platform_backend   |  * Running on http://127.0.0.1:5000
+course_platform_backend   |  * Running on http://192.168.148.3:5000
+course_platform_backend   | [33mPress CTRL+C to quit[0m
+course_platform_backend   |  * Restarting with stat
+course_platform_frontend  |    ▲ Next.js 14.1.0
+course_platform_frontend  |    - Local:        http://localhost:3000
+course_platform_frontend  | 
+course_platform_frontend  |  ✓ Ready in 299ms
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 121-821-953
