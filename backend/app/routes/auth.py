@@ -96,9 +96,16 @@ def login():
     }), 200
 
 @auth_bp.route('/me', methods=['GET'])
-@jwt_required()
 def get_current_user():
-    current_user = get_jwt_identity()
+    current_user = None
+    try:
+        from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+        verify_jwt_in_request(optional=True)
+        current_user = get_jwt_identity()
+    except Exception:
+        pass
+    if not current_user:
+        return jsonify({'message': 'Not logged in'}), 200
     user = User.query.get(current_user['id'])
     
     if not user:

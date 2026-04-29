@@ -7,9 +7,14 @@ from app.models import Course, Enrollment, Category
 recommendations_bp = Blueprint('recommendations', __name__)
 
 @recommendations_bp.route('/home', methods=['GET'])
-@jwt_required(optional=True)
 def get_home_recommendations():
-    current_user = get_jwt_identity()
+    current_user = None
+    try:
+        from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+        verify_jwt_in_request(optional=True)
+        current_user = get_jwt_identity()
+    except Exception:
+        pass
     
     popular_courses = Course.query.filter_by(
         status='published'

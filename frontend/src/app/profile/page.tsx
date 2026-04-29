@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
-  User, 
-  Settings, 
-  Save, 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  User,
+  Settings,
+  Save,
   Upload,
   Eye,
   EyeOff,
-  UserCircle
-} from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { authApi, uploadApi } from '../../lib/api';
-import { useAuth } from '../../contexts/AuthContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+  UserCircle,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { authApi, uploadApi } from "../../lib/api";
+import { useAuth } from "../../contexts/AuthContext";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 interface ProfileForm {
   username: string;
@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [avatar, setAvatar] = useState('');
+  const [avatar, setAvatar] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const {
@@ -41,17 +41,17 @@ export default function ProfilePage() {
     formState: { errors },
   } = useForm<ProfileForm>();
 
-  const newPassword = watch('newPassword');
+  const newPassword = watch("newPassword");
 
   useEffect(() => {
     if (!user) {
-      router.push('/login?redirect=/profile');
+      router.push("/login?redirect=/profile");
       return;
     }
 
-    setValue('username', user.username || '');
-    setValue('bio', user.bio || '');
-    setAvatar(user.avatar || '');
+    setValue("username", user.username || "");
+    setValue("bio", user.bio || "");
+    setAvatar(user.avatar || "");
     setLoading(false);
   }, [user, router, setValue]);
 
@@ -63,14 +63,14 @@ export default function ProfilePage() {
     try {
       const res = await uploadApi.uploadAvatar(file);
       setAvatar(res.data.url);
-      
+
       await authApi.updateProfile({ avatar: res.data.url });
       updateUser({ user: { ...user, avatar: res.data.url } });
-      
-      alert('头像更新成功！');
+
+      alert("头像更新成功！");
     } catch (error) {
-      console.error('Failed to upload avatar:', error);
-      alert('头像上传失败');
+      console.error("Failed to upload avatar:", error);
+      alert("头像上传失败");
     } finally {
       setUploadingAvatar(false);
     }
@@ -90,11 +90,11 @@ export default function ProfilePage() {
 
       const res = await authApi.updateProfile(updateData);
       updateUser(res);
-      
-      alert('个人信息更新成功！');
+
+      alert("个人信息更新成功！");
     } catch (error) {
-      console.error('Failed to update profile:', error);
-      alert('更新失败，请重试');
+      console.error("Failed to update profile:", error);
+      alert("更新失败，请重试");
     } finally {
       setSaving(false);
     }
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                   <div className="relative group cursor-pointer">
                     {avatar ? (
                       <img
-                        src={`http://localhost:5000${avatar}`}
+                        src={avatar}
                         alt="Avatar"
                         className="w-24 h-24 rounded-full object-cover"
                       />
@@ -173,17 +173,19 @@ export default function ProfilePage() {
                   </label>
                   <input
                     type="text"
-                    {...register('username', {
-                      required: '请输入用户名',
+                    {...register("username", {
+                      required: "请输入用户名",
                       minLength: {
                         value: 2,
-                        message: '用户名至少2个字符',
+                        message: "用户名至少2个字符",
                       },
                     })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                   {errors.username && (
-                    <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.username.message}
+                    </p>
                   )}
                 </div>
 
@@ -193,7 +195,7 @@ export default function ProfilePage() {
                   </label>
                   <input
                     type="email"
-                    value={user?.email || ''}
+                    value={user?.email || ""}
                     disabled
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                   />
@@ -205,7 +207,7 @@ export default function ProfilePage() {
                     个人简介
                   </label>
                   <textarea
-                    {...register('bio')}
+                    {...register("bio")}
                     rows={3}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                     placeholder="介绍一下自己..."
@@ -217,12 +219,14 @@ export default function ProfilePage() {
                     账户角色
                   </label>
                   <div className="flex items-center space-x-2">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      user?.role === 'instructor'
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-green-100 text-green-700'
-                    }`}>
-                      {user?.role === 'instructor' ? '讲师' : '学员'}
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        user?.role === "instructor"
+                          ? "bg-purple-100 text-purple-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
+                    >
+                      {user?.role === "instructor" ? "讲师" : "学员"}
                     </span>
                   </div>
                 </div>
@@ -232,7 +236,9 @@ export default function ProfilePage() {
             <div className="border-t pt-6">
               <div className="flex items-center space-x-3 mb-4">
                 <Settings className="w-6 h-6 text-primary-600" />
-                <h2 className="text-lg font-semibold text-gray-900">修改密码</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  修改密码
+                </h2>
               </div>
               <p className="text-sm text-gray-500 mb-4">
                 如不需要修改密码，请留空以下字段
@@ -245,8 +251,8 @@ export default function ProfilePage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? 'text' : 'password'}
-                      {...register('currentPassword')}
+                      type={showPassword ? "text" : "password"}
+                      {...register("currentPassword")}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12"
                       placeholder="请输入当前密码"
                     />
@@ -255,7 +261,11 @@ export default function ProfilePage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -266,17 +276,19 @@ export default function ProfilePage() {
                   </label>
                   <input
                     type="password"
-                    {...register('newPassword', {
+                    {...register("newPassword", {
                       minLength: {
                         value: 6,
-                        message: '密码至少6个字符',
+                        message: "密码至少6个字符",
                       },
                     })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="请输入新密码"
                   />
                   {errors.newPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.newPassword.message}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.newPassword.message}
+                    </p>
                   )}
                 </div>
 
@@ -286,15 +298,19 @@ export default function ProfilePage() {
                   </label>
                   <input
                     type="password"
-                    {...register('confirmPassword', {
+                    {...register("confirmPassword", {
                       validate: (value) =>
-                        !newPassword || value === newPassword || '两次输入的密码不一致',
+                        !newPassword ||
+                        value === newPassword ||
+                        "两次输入的密码不一致",
                     })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="请再次输入新密码"
                   />
                   {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.confirmPassword.message}
+                    </p>
                   )}
                 </div>
               </div>
