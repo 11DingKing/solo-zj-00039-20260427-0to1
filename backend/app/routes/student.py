@@ -7,20 +7,30 @@ from app.models import Enrollment, Course, StudyRecord, Review, Certificate
 
 student_bp = Blueprint('student', __name__)
 
+def require_auth():
+    from flask_jwt_extended import verify_jwt_in_request
+    from flask import jsonify
+    try:
+        verify_jwt_in_request()
+    except Exception as e:
+        return jsonify({'message': 'Authentication required', 'error': str(e)}), 401
+    return None
+
 @student_bp.route('/courses', methods=['GET'])
 def get_my_courses():
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     status = request.args.get('status')
-    
+
     query = Enrollment.query.filter_by(student_id=current_user['id'])
-    
+
     if status in ['in_progress', 'completed']:
         query = query.filter_by(status=status)
-    
+
     enrollments = query.order_by(Enrollment.last_accessed_at.desc()).all()
-    
+
     courses_data = []
     for enrollment in enrollments:
         course = enrollment.course
@@ -28,170 +38,153 @@ def get_my_courses():
             'id': course.id,
             'title': course.title,
             'cover_image': course.cover_image,
-            'instructor_name': course.instructor.username if course.instructor else None,
             'category_name': course.category.name if course.category else None,
             'difficulty': course.difficulty,
+            'instructor_name': course.instructor.username if course.instructor else None,
             'progress': enrollment.progress,
             'total_lessons': enrollment.total_lessons,
             'completed_lessons': enrollment.completed_lessons,
             'status': enrollment.status,
-            'enrolled_at': enrollment.enrolled_at.isoformat(),
-            'last_accessed_at': enrollment.last_accessed_at.isoformat(),
+            'enrolled_at': enrollment.enrolled_at.isoformat() if enrollment.enrolled_at else None,
+            'last_accessed_at': enrollment.last_accessed_at.isoformat() if enrollment.last_accessed_at else None,
             'completed_at': enrollment.completed_at.isoformat() if enrollment.completed_at else None
         })
-    
-    return jsonify({'courses': courses_data}), 200
+
+    return jsonify({
+        'courses': courses_data,
+        'total': len(courses_data)
+    }), 200
 
 @student_bp.route('/timeline', methods=['GET'])
 def get_study_timeline():
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
+
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
-    days = request.args.get('days', 30, type=int)
-    
-    since_date = datetime.utcnow() - timedelta(days=days)
-    
-    query = StudyRecord.query.filter(
-        StudyRecord.student_id == current_user['id'],
-        StudyRecord.created_at >= since_date
-    ).order_by(desc(StudyRecord.created_at))
-    
-    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    
+
+    records = StudyRecord.query.filter_by(
+        student_id=current_user['id']
+    ).order_by(StudyRecord.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
     timeline_data = []
-    for record in pagination.items:
-        course = Course.query.get(record.course_id) if record.course_id else None
+    for record in records.items:
+        lesson = record.lesson
+        chapter = lesson.chapter if lesson else None
+        course = chapter.course if chapter else None
+
         timeline_data.append({
             'id': record.id,
-            'course_id': record.course_id,
-            'course_title': course.title if course else None,
-            'lesson_id': record.lesson_id,
             'action': record.action,
             'study_duration': record.study_duration,
-            'created_at': record.created_at.isoformat()
+            'created_at': record.created_at.isoformat(),
+            'lesson_id': record.lesson_id,
+            'lesson_title': lesson.title if lesson else None,
+            'chapter_title': chapter.title if chapter else None,
+            'course_id': course.id if course else None,
+            'course_title': course.title if course else None
         })
-    
-    daily_stats = db.session.query(
-        func.date(StudyRecord.created_at).label('date'),
-        func.count(StudyRecord.id).label('count'),
-        func.sum(StudyRecord.study_duration).label('total_duration')
-    ).filter(
-        StudyRecord.student_id == current_user['id'],
-        StudyRecord.created_at >= since_date
-    ).group_by(
-        func.date(StudyRecord.created_at)
-    ).order_by(
-        'date'
-    ).all()
-    
-    daily_data = []
-    for stat in daily_stats:
-        daily_data.append({
-            'date': str(stat.date),
-            'count': stat.count,
-            'total_duration': stat.total_duration or 0
-        })
-    
+
     return jsonify({
         'timeline': timeline_data,
-        'daily_stats': daily_data,
-        'total': pagination.total,
-        'pages': pagination.pages,
+        'total': records.total,
+        'pages': records.pages,
         'current_page': page
     }), 200
 
 @student_bp.route('/record', methods=['POST'])
 def add_study_record():
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
+
     data = request.get_json()
-    
+
     record = StudyRecord(
         student_id=current_user['id'],
         course_id=data.get('course_id'),
         lesson_id=data.get('lesson_id'),
-        action=data.get('action', 'study'),
+        action=data.get('action', 'view'),
         study_duration=data.get('study_duration', 0)
     )
-    
+
     db.session.add(record)
     db.session.commit()
-    
+
     return jsonify({
-        'message': 'Study record added',
+        'message': 'Study record added successfully',
         'record': {
             'id': record.id,
             'action': record.action,
-            'study_duration': record.study_duration,
             'created_at': record.created_at.isoformat()
         }
     }), 201
 
 @student_bp.route('/stats', methods=['GET'])
 def get_student_stats():
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
-    
-    total_enrolled = Enrollment.query.filter_by(
-        student_id=current_user['id']
-    ).count()
-    
-    completed_courses = Enrollment.query.filter_by(
-        student_id=current_user['id'],
-        status='completed'
-    ).count()
-    
-    certificates = Certificate.query.filter_by(
-        student_id=current_user['id']
-    ).count()
-    
-    total_study_duration = db.session.query(
+
+    enrollments = Enrollment.query.filter_by(student_id=current_user['id']).all()
+
+    total_courses = len(enrollments)
+    completed_courses = len([e for e in enrollments if e.status == 'completed'])
+    in_progress_courses = len([e for e in enrollments if e.status == 'in_progress'])
+
+    total_study_time = db.session.query(
         func.sum(StudyRecord.study_duration)
     ).filter_by(student_id=current_user['id']).scalar() or 0
-    
-    last_7_days = datetime.utcnow() - timedelta(days=7)
-    weekly_study = db.session.query(
-        func.sum(StudyRecord.study_duration)
-    ).filter(
-        StudyRecord.student_id == current_user['id'],
-        StudyRecord.created_at >= last_7_days
-    ).scalar() or 0
-    
+
+    certificates = Certificate.query.filter_by(student_id=current_user['id']).count()
+
     return jsonify({
-        'total_enrolled': total_enrolled,
+        'total_courses': total_courses,
         'completed_courses': completed_courses,
-        'certificates': certificates,
-        'total_study_duration': total_study_duration,
-        'weekly_study_duration': weekly_study
+        'in_progress_courses': in_progress_courses,
+        'total_study_time': total_study_time,
+        'certificates': certificates
     }), 200
 
 @student_bp.route('/reviews', methods=['GET'])
 def get_my_reviews():
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
-    
+
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+
     reviews = Review.query.filter_by(
         student_id=current_user['id']
-    ).order_by(Review.created_at.desc()).all()
-    
+    ).order_by(Review.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
     reviews_data = []
-    for review in reviews:
+    for review in reviews.items:
         course = review.course
         reviews_data.append({
             'id': review.id,
             'course_id': review.course_id,
             'course_title': course.title if course else None,
-            'course_cover': course.cover_image if course else None,
             'rating': review.rating,
             'comment': review.comment,
             'instructor_reply': review.instructor_reply,
             'instructor_reply_at': review.instructor_reply_at.isoformat() if review.instructor_reply_at else None,
             'created_at': review.created_at.isoformat()
         })
-    
-    return jsonify({'reviews': reviews_data}), 200
+
+    return jsonify({
+        'reviews': reviews_data,
+        'total': reviews.total,
+        'pages': reviews.pages,
+        'current_page': page
+    }), 200

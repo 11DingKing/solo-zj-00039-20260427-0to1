@@ -6,6 +6,15 @@ from app.models import Course, Chapter, Lesson, Category, User, Enrollment
 
 courses_bp = Blueprint('courses', __name__)
 
+def require_auth():
+    from flask_jwt_extended import verify_jwt_in_request
+    from flask import jsonify
+    try:
+        verify_jwt_in_request()
+    except Exception as e:
+        return jsonify({'message': 'Authentication required', 'error': str(e)}), 401
+    return None
+
 def get_course_total_lessons(course):
     total = 0
     for chapter in course.chapters:
@@ -33,7 +42,7 @@ def course_to_dict(course, include_details=False):
         'created_at': course.created_at.isoformat(),
         'updated_at': course.updated_at.isoformat()
     }
-    
+
     if include_details:
         chapters_data = []
         for chapter in course.chapters:
@@ -55,7 +64,7 @@ def course_to_dict(course, include_details=False):
                 'lessons': lessons_data
             })
         data['chapters'] = chapters_data
-    
+
     return data
 
 @courses_bp.route('/categories', methods=['GET'])
@@ -72,15 +81,15 @@ def get_courses():
     keyword = request.args.get('keyword')
     sort = request.args.get('sort', 'newest')
     status = request.args.get('status', 'published')
-    
+
     query = Course.query.filter_by(status=status)
-    
+
     if category_id:
         query = query.filter_by(category_id=category_id)
-    
+
     if difficulty and difficulty in ['beginner', 'intermediate', 'advanced']:
         query = query.filter_by(difficulty=difficulty)
-    
+
     if keyword:
         query = query.filter(
             or_(
@@ -88,18 +97,18 @@ def get_courses():
                 Course.description.ilike(f'%{keyword}%')
             )
         )
-    
+
     if sort == 'hot':
         query = query.order_by(Course.student_count.desc())
     elif sort == 'newest':
         query = query.order_by(Course.created_at.desc())
     elif sort == 'rating':
         query = query.order_by(Course.average_rating.desc())
-    
+
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    
+
     courses_data = [course_to_dict(c) for c in pagination.items]
-    
+
     return jsonify({
         'courses': courses_data,
         'total': pagination.total,
@@ -110,29 +119,30 @@ def get_courses():
 @courses_bp.route('/<course_id>', methods=['GET'])
 def get_course(course_id):
     course = Course.query.get(course_id)
-    
+
     if not course:
         return jsonify({'message': 'Course not found'}), 404
-    
+
     course.view_count += 1
     db.session.commit()
-    
+
     return jsonify(course_to_dict(course, include_details=True)), 200
 
 @courses_bp.route('', methods=['POST'])
 def create_course():
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
-    
+
     if current_user['role'] != 'instructor':
         return jsonify({'message': 'Only instructors can create courses'}), 403
-    
+
     data = request.get_json()
-    
+
     if not data or 'title' not in data:
         return jsonify({'message': 'Title is required'}), 400
-    
+
     course = Course(
         title=data['title'],
         description=data.get('description'),
@@ -142,10 +152,10 @@ def create_course():
         is_free=data.get('is_free', True),
         instructor_id=current_user['id']
     )
-    
+
     db.session.add(course)
     db.session.commit()
-    
+
     return jsonify({
         'message': 'Course created successfully',
         'course': course_to_dict(course)
@@ -153,19 +163,20 @@ def create_course():
 
 @courses_bp.route('/<course_id>', methods=['PUT'])
 def update_course(course_id):
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     course = Course.query.get(course_id)
-    
+
     if not course:
         return jsonify({'message': 'Course not found'}), 404
-    
+
     if course.instructor_id != current_user['id']:
         return jsonify({'message': 'You can only update your own courses'}), 403
-    
+
     data = request.get_json()
-    
+
     if 'title' in data:
         course.title = data['title']
     if 'description' in data:
@@ -180,9 +191,9 @@ def update_course(course_id):
         course.is_free = data['is_free']
     if 'status' in data:
         course.status = data['status']
-    
+
     db.session.commit()
-    
+
     return jsonify({
         'message': 'Course updated successfully',
         'course': course_to_dict(course)
@@ -190,34 +201,35 @@ def update_course(course_id):
 
 @courses_bp.route('/<course_id>/chapters', methods=['POST'])
 def create_chapter(course_id):
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     course = Course.query.get(course_id)
-    
+
     if not course:
         return jsonify({'message': 'Course not found'}), 404
-    
+
     if course.instructor_id != current_user['id']:
         return jsonify({'message': 'You can only modify your own courses'}), 403
-    
+
     data = request.get_json()
-    
+
     if not data or 'title' not in data:
         return jsonify({'message': 'Title is required'}), 400
-    
+
     max_order = db.session.query(db.func.max(Chapter.order_index)).filter_by(course_id=course_id).scalar() or 0
-    
+
     chapter = Chapter(
         title=data['title'],
         description=data.get('description'),
         course_id=course_id,
         order_index=max_order + 1
     )
-    
+
     db.session.add(chapter)
     db.session.commit()
-    
+
     return jsonify({
         'message': 'Chapter created successfully',
         'chapter': {
@@ -230,29 +242,30 @@ def create_chapter(course_id):
 
 @courses_bp.route('/chapters/<chapter_id>', methods=['PUT'])
 def update_chapter(chapter_id):
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     chapter = Chapter.query.get(chapter_id)
-    
+
     if not chapter:
         return jsonify({'message': 'Chapter not found'}), 404
-    
+
     course = Course.query.get(chapter.course_id)
     if course.instructor_id != current_user['id']:
         return jsonify({'message': 'You can only modify your own courses'}), 403
-    
+
     data = request.get_json()
-    
+
     if 'title' in data:
         chapter.title = data['title']
     if 'description' in data:
         chapter.description = data['description']
     if 'order_index' in data:
         chapter.order_index = data['order_index']
-    
+
     db.session.commit()
-    
+
     return jsonify({
         'message': 'Chapter updated successfully',
         'chapter': {
@@ -265,35 +278,37 @@ def update_chapter(chapter_id):
 
 @courses_bp.route('/chapters/<chapter_id>', methods=['DELETE'])
 def delete_chapter(chapter_id):
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     chapter = Chapter.query.get(chapter_id)
-    
+
     if not chapter:
         return jsonify({'message': 'Chapter not found'}), 404
-    
+
     course = Course.query.get(chapter.course_id)
     if course.instructor_id != current_user['id']:
         return jsonify({'message': 'You can only modify your own courses'}), 403
-    
+
     for lesson in chapter.lessons:
         db.session.delete(lesson)
-    
+
     db.session.delete(chapter)
     db.session.commit()
-    
+
     return jsonify({'message': 'Chapter deleted successfully'}), 200
 
 @courses_bp.route('/chapters/reorder', methods=['POST'])
 def reorder_chapters():
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     data = request.get_json()
-    
+
     chapter_ids = data.get('chapter_ids', [])
-    
+
     for index, chapter_id in enumerate(chapter_ids):
         chapter = Chapter.query.get(chapter_id)
         if chapter:
@@ -301,36 +316,37 @@ def reorder_chapters():
             if course.instructor_id != current_user['id']:
                 continue
             chapter.order_index = index + 1
-    
+
     db.session.commit()
-    
+
     return jsonify({'message': 'Chapters reordered successfully'}), 200
 
 @courses_bp.route('/chapters/<chapter_id>/lessons', methods=['POST'])
 def create_lesson(chapter_id):
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     chapter = Chapter.query.get(chapter_id)
-    
+
     if not chapter:
         return jsonify({'message': 'Chapter not found'}), 404
-    
+
     course = Course.query.get(chapter.course_id)
     if course.instructor_id != current_user['id']:
         return jsonify({'message': 'You can only modify your own courses'}), 403
-    
+
     data = request.get_json()
-    
+
     if not data or 'title' not in data or 'lesson_type' not in data:
         return jsonify({'message': 'Title and lesson_type are required'}), 400
-    
+
     lesson_type = data['lesson_type']
     if lesson_type not in ['video', 'text', 'quiz']:
         return jsonify({'message': 'Invalid lesson type'}), 400
-    
+
     max_order = db.session.query(db.func.max(Lesson.order_index)).filter_by(chapter_id=chapter_id).scalar() or 0
-    
+
     lesson = Lesson(
         title=data['title'],
         lesson_type=lesson_type,
@@ -338,7 +354,7 @@ def create_lesson(chapter_id):
         order_index=max_order + 1,
         duration=data.get('duration', 0)
     )
-    
+
     if lesson_type == 'video':
         lesson.video_url = data.get('video_url')
         lesson.video_duration = data.get('video_duration', 0)
@@ -346,10 +362,10 @@ def create_lesson(chapter_id):
         lesson.text_content = data.get('text_content')
     elif lesson_type == 'quiz':
         lesson.quiz_questions = data.get('quiz_questions')
-    
+
     db.session.add(lesson)
     db.session.commit()
-    
+
     return jsonify({
         'message': 'Lesson created successfully',
         'lesson': {
@@ -362,28 +378,29 @@ def create_lesson(chapter_id):
 
 @courses_bp.route('/lessons/<lesson_id>', methods=['PUT'])
 def update_lesson(lesson_id):
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     lesson = Lesson.query.get(lesson_id)
-    
+
     if not lesson:
         return jsonify({'message': 'Lesson not found'}), 404
-    
+
     chapter = Chapter.query.get(lesson.chapter_id)
     course = Course.query.get(chapter.course_id)
     if course.instructor_id != current_user['id']:
         return jsonify({'message': 'You can only modify your own courses'}), 403
-    
+
     data = request.get_json()
-    
+
     if 'title' in data:
         lesson.title = data['title']
     if 'order_index' in data:
         lesson.order_index = data['order_index']
     if 'duration' in data:
         lesson.duration = data['duration']
-    
+
     if lesson.lesson_type == 'video':
         if 'video_url' in data:
             lesson.video_url = data['video_url']
@@ -395,9 +412,9 @@ def update_lesson(lesson_id):
     elif lesson.lesson_type == 'quiz':
         if 'quiz_questions' in data:
             lesson.quiz_questions = data['quiz_questions']
-    
+
     db.session.commit()
-    
+
     return jsonify({
         'message': 'Lesson updated successfully',
         'lesson': {
@@ -410,16 +427,17 @@ def update_lesson(lesson_id):
 
 @courses_bp.route('/lessons/<lesson_id>', methods=['GET'])
 def get_lesson(lesson_id):
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     lesson = Lesson.query.get(lesson_id)
-    
+
     if not lesson:
         return jsonify({'message': 'Lesson not found'}), 404
-    
+
     chapter = Chapter.query.get(lesson.chapter_id)
     course = Course.query.get(chapter.course_id)
-    
+
     lesson_data = {
         'id': lesson.id,
         'title': lesson.title,
@@ -433,38 +451,40 @@ def get_lesson(lesson_id):
         'text_content': lesson.text_content,
         'quiz_questions': lesson.quiz_questions
     }
-    
+
     return jsonify(lesson_data), 200
 
 @courses_bp.route('/lessons/<lesson_id>', methods=['DELETE'])
 def delete_lesson(lesson_id):
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     lesson = Lesson.query.get(lesson_id)
-    
+
     if not lesson:
         return jsonify({'message': 'Lesson not found'}), 404
-    
+
     chapter = Chapter.query.get(lesson.chapter_id)
     course = Course.query.get(chapter.course_id)
     if course.instructor_id != current_user['id']:
         return jsonify({'message': 'You can only modify your own courses'}), 403
-    
+
     db.session.delete(lesson)
     db.session.commit()
-    
+
     return jsonify({'message': 'Lesson deleted successfully'}), 200
 
 @courses_bp.route('/lessons/reorder', methods=['POST'])
 def reorder_lessons():
-    from flask_jwt_extended import verify_jwt_in_request
-    verify_jwt_in_request()
+    auth_error = require_auth()
+    if auth_error:
+        return auth_error
     current_user = get_jwt_identity()
     data = request.get_json()
-    
+
     lesson_ids = data.get('lesson_ids', [])
-    
+
     for index, lesson_id in enumerate(lesson_ids):
         lesson = Lesson.query.get(lesson_id)
         if lesson:
@@ -473,7 +493,7 @@ def reorder_lessons():
             if course.instructor_id != current_user['id']:
                 continue
             lesson.order_index = index + 1
-    
+
     db.session.commit()
-    
+
     return jsonify({'message': 'Lessons reordered successfully'}), 200

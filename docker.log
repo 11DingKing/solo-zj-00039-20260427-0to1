@@ -133,3 +133,78 @@ course_platform_frontend  |
 course_platform_frontend  |  ✓ Ready in 299ms
 course_platform_backend   |  * Debugger is active!
 course_platform_backend   |  * Debugger PIN: 121-821-953
+course_platform_db        | 2026-04-29 11:58:25.608 UTC [26] LOG:  checkpoint starting: time
+course_platform_db        | 2026-04-29 11:58:25.662 UTC [26] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.005 s, total=0.055 s; sync files=2, longest=0.003 s, average=0.003 s; distance=0 kB, estimate=0 kB; lsn=0/19EF880, redo lsn=0/19EF848
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:02:10] "GET /api/auth/me HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:02:10] "[31m[1mGET /api/student/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:02:10] "[31m[1mGET /api/student/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:02:42] "POST /api/auth/login HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:02:42] "[31m[1mGET /api/student/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:03:20] "GET /api/courses/categories HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:03:20] "GET /api/courses?page=1&per_page=12&sort=newest HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:03:22] "[31m[1mGET /api/instructor/stats HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:03:22] "[31m[1mGET /api/instructor/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:03:22] "GET /api/courses/categories HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:00] "[31m[1mPOST /api/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:01] "[31m[1mPOST /api/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:01] "[31m[1mPOST /api/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:01] "[31m[1mPOST /api/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:02] "[31m[1mPOST /api/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:10] "GET /api/courses/categories HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:10] "GET /api/courses?page=1&per_page=12&sort=newest HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:11] "[31m[1mGET /api/instructor/stats HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:11] "[31m[1mGET /api/instructor/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:11] "GET /api/courses/categories HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:46] "[31m[1mGET /api/student/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:47] "[31m[1mGET /api/certificates/mine HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:49] "[31m[1mGET /api/instructor/stats HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:49] "GET /api/courses/categories HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:49] "[31m[1mGET /api/instructor/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:50] "[31m[1mGET /api/certificates/mine HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:50] "[31m[1mGET /api/student/courses HTTP/1.1[0m" 422 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:05:55] "[31m[1mPUT /api/auth/profile HTTP/1.1[0m" 422 -
+course_platform_backend   |  * Detected change in '/app/app/routes/student.py', reloading
+course_platform_backend   |  * Restarting with stat
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 121-821-953
+course_platform_backend   |  * Detected change in '/app/app/routes/instructor.py', reloading
+course_platform_backend   |  * Restarting with stat
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 121-821-953
+course_platform_backend   |  * Detected change in '/app/app/routes/certificates.py', reloading
+course_platform_backend   |  * Restarting with stat
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 121-821-953
+course_platform_backend   |  * Detected change in '/app/app/routes/upload.py', reloading
+course_platform_backend   |  * Restarting with stat
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 121-821-953
+course_platform_backend   |  * Detected change in '/app/app/routes/progress.py', reloading
+course_platform_backend   |  * Restarting with stat
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 121-821-953
+course_platform_backend   |  * Detected change in '/app/app/routes/auth.py', reloading
+course_platform_backend   |  * Restarting with stat
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 121-821-953
+course_platform_backend   |  * Detected change in '/app/app/routes/courses.py', reloading
+course_platform_backend   |  * Restarting with stat
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 121-821-953
+[Kcourse_platform_backend exited with code 0 (restarting)
+course_platform_backend   |  * Serving Flask app 'app'
+course_platform_backend   |  * Debug mode: on
+course_platform_backend   | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+course_platform_backend   |  * Running on all addresses (0.0.0.0)
+course_platform_backend   |  * Running on http://127.0.0.1:5000
+course_platform_backend   |  * Running on http://192.168.148.3:5000
+course_platform_backend   | [33mPress CTRL+C to quit[0m
+course_platform_backend   |  * Restarting with stat
+course_platform_backend   |  * Debugger is active!
+course_platform_backend   |  * Debugger PIN: 529-442-439
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:17:03] "GET /api/auth/me HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:17:19] "POST /api/auth/login HTTP/1.1" 200 -
+course_platform_backend   | 192.168.148.4 - - [29/Apr/2026 12:17:23] "[31m[1mPOST /api/upload/avatar HTTP/1.1[0m" 401 -
+[Kcourse_platform_frontend exited with code 0
+[Kcourse_platform_backend exited with code 137
+[Kcourse_platform_db exited with code 137
